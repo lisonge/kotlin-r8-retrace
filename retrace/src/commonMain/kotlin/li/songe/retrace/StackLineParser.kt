@@ -7,7 +7,7 @@ internal class StackLineParser(
     private val handlers: List<RegexGroupHandler>
 
     init {
-        val translated = RegexTranslator.translate(regex)
+        val translated = translate(regex)
         compiledRegex = Regex(translated.pattern)
         handlers = translated.handlers
     }
@@ -19,14 +19,14 @@ internal class StackLineParser(
         handlers.forEach { handler ->
             if (seenMatchedClass && handler.isClassHandler) return@forEach
             val group = match.groups[handler.groupIndex] ?: return@forEach
-            if (handler.apply(builder, group.range.first, group.range.last + 1)) {
+            if (handler.apply(builder, group.matchRange.first, group.matchRange.last + 1)) {
                 seenMatchedClass = seenMatchedClass || handler.isClassHandler
             }
         }
         return builder.build()
     }
 
-    private companion object RegexTranslator {
+    private companion object {
         private const val NOT_ALLOWED_CHARACTERS: String = "\\s\\[\\];:()<>"
         private const val IDENTIFIER_PREFIX: String = "[^\\d$NOT_ALLOWED_CHARACTERS]"
         private const val IDENTIFIER_SUFFIX: String = "[^$NOT_ALLOWED_CHARACTERS]*"

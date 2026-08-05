@@ -20,8 +20,6 @@ kotlin {
         binaries.executable()
     }
 
-    mingwX64()
-
     sourceSets {
         commonMain.dependencies {
             implementation(libs.json5)
