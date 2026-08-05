@@ -23,15 +23,15 @@ internal object MappingInfoParser {
         val id = root.string("id") ?: return null
         return when (id) {
             "com.android.tools.r8.mapping" ->
-                root.string("version")?.let(MappingInfo::MapVersion) ?: MappingInfo.Unknown(id)
+                if (root.string("version") != null) MappingInfo.MapVersion else MappingInfo.Unknown(id)
             "sourceFile" ->
                 root.string("fileName")?.let(MappingInfo::SourceFile) ?: MappingInfo.Unknown(id)
             "com.android.tools.r8.synthesized" -> MappingInfo.CompilerSynthesized
             "com.android.tools.r8.outline" -> MappingInfo.Outline
             "com.android.tools.r8.outlineCallsite" -> parseOutlineCallsite(root) ?: MappingInfo.Unknown(id)
-            "com.android.tools.r8.rewriteFrame" -> parseRewriteFrame(root) ?: MappingInfo.Unknown(id)
+            "com.android.tools.r8.rewriteFrame" -> parseRewriteFrame(root)
             "com.android.tools.r8.residualsignature" ->
-                root.string("signature")?.let(MappingInfo::ResidualSignature) ?: MappingInfo.Unknown(id)
+                if (root.string("signature") != null) MappingInfo.ResidualSignature else MappingInfo.Unknown(id)
             else -> MappingInfo.Unknown(id)
         }
     }
@@ -47,12 +47,11 @@ internal object MappingInfoParser {
         return MappingInfo.OutlineCallsite(
             OutlineCallsiteInfo(
                 positions = positions,
-                outline = root.string("outline"),
             ),
         )
     }
 
-    private fun parseRewriteFrame(root: JsonObject): MappingInfo.RewriteFrame? {
+    private fun parseRewriteFrame(root: JsonObject): MappingInfo.RewriteFrame {
         val conditions = root.array("conditions")?.mapNotNull(::parseCondition) ?: emptyList()
         val actions = root.array("actions")?.mapNotNull(::parseAction) ?: emptyList()
         return MappingInfo.RewriteFrame(RewriteFrameInfo(conditions, actions))

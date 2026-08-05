@@ -43,60 +43,41 @@ internal data class Range(
     fun contains(value: Int): Boolean = value in from..to
 
     fun span(): Int = if (isCardinal) 1 else to - from + 1
-
-    fun isCatchAll(): Boolean = from == 0 && to == Int.MAX_VALUE
-}
-
-internal sealed interface Signature {
-    val name: String
-    val type: String
-    fun renamed(renamedName: String): Signature
 }
 
 internal data class MethodSignature(
-    override val name: String,
-    override val type: String,
+    val name: String,
+    val type: String,
     val parameters: List<String>,
-) : Signature {
-    override fun renamed(renamedName: String): MethodSignature = copy(name = renamedName)
-}
+)
 
 internal data class FieldSignature(
-    override val name: String,
-    override val type: String,
-) : Signature {
-    override fun renamed(renamedName: String): FieldSignature = copy(name = renamedName)
-}
+    val name: String,
+    val type: String,
+)
 
 internal data class MappingIndex(
     val classes: Map<String, ClassMapping>,
-    val mapVersions: List<String>,
     val diagnostics: List<RetraceDiagnostic>,
 )
 
 internal data class ClassMapping(
     val originalName: String,
-    val obfuscatedName: String,
     val sourceFile: String?,
-    val synthesized: Boolean,
     val methodsByObfuscatedName: Map<String, List<MethodMapping>>,
     val fieldsByObfuscatedName: Map<String, List<FieldMapping>>,
 )
 
 internal data class MutableClassMapping(
     val originalName: String,
-    val obfuscatedName: String,
     var sourceFile: String? = null,
-    var synthesized: Boolean = false,
     val methods: MutableList<MethodMapping> = mutableListOf(),
     val fields: MutableList<FieldMapping> = mutableListOf(),
 ) {
     fun freeze(): ClassMapping =
         ClassMapping(
             originalName = originalName,
-            obfuscatedName = obfuscatedName,
             sourceFile = sourceFile,
-            synthesized = synthesized,
             methodsByObfuscatedName = methods.groupBy { it.obfuscatedName },
             fieldsByObfuscatedName = fields.groupBy { it.obfuscatedName },
         )
@@ -104,11 +85,9 @@ internal data class MutableClassMapping(
 
 internal data class MethodMapping(
     val originalSignature: MethodSignature,
-    val residualSignature: MethodSignature,
     val obfuscatedName: String,
     val minifiedRange: Range?,
     val originalRange: Range?,
-    val sourceLine: Int,
     val synthesized: Boolean,
     val outline: Boolean,
     val outlineCallsite: OutlineCallsiteInfo?,
@@ -120,35 +99,17 @@ internal data class MethodMapping(
             is MappingInfo.Outline -> copy(outline = true, synthesized = true)
             is MappingInfo.OutlineCallsite -> copy(outlineCallsite = info.info)
             is MappingInfo.RewriteFrame -> copy(rewriteFrame = info.info)
-            is MappingInfo.ResidualSignature -> {
-                val signature = info.asMethodSignature(obfuscatedName)
-                if (signature == null) this else copy(residualSignature = signature)
-            }
             else -> this
         }
 }
 
 internal data class FieldMapping(
     val originalSignature: FieldSignature,
-    val residualSignature: FieldSignature,
     val obfuscatedName: String,
-    val sourceLine: Int,
-    val synthesized: Boolean,
-) {
-    fun withInfo(info: MappingInfo): FieldMapping =
-        when (info) {
-            is MappingInfo.CompilerSynthesized -> copy(synthesized = true)
-            is MappingInfo.ResidualSignature -> {
-                val signature = info.asFieldSignature(obfuscatedName)
-                if (signature == null) this else copy(residualSignature = signature)
-            }
-            else -> this
-        }
-}
+)
 
 internal data class OutlineCallsiteInfo(
     val positions: Map<Int, Int>,
-    val outline: String?,
 ) {
     fun rewritePosition(position: Int): Int = positions[position] ?: position
 }
@@ -191,12 +152,12 @@ internal data class RetraceContext(
 }
 
 internal sealed interface MappingInfo {
-    data class MapVersion(val version: String) : MappingInfo
+    data object MapVersion : MappingInfo
     data class SourceFile(val fileName: String) : MappingInfo
     data object CompilerSynthesized : MappingInfo
     data object Outline : MappingInfo
     data class OutlineCallsite(val info: OutlineCallsiteInfo) : MappingInfo
     data class RewriteFrame(val info: RewriteFrameInfo) : MappingInfo
-    data class ResidualSignature(val descriptor: String) : MappingInfo
+    data object ResidualSignature : MappingInfo
     data class Unknown(val id: String) : MappingInfo
 }

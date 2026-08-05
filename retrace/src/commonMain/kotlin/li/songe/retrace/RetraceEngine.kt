@@ -25,11 +25,11 @@ internal class RetraceEngine(
         val classMapping = mappingIndex.classes[obfuscatedClass]
         val methodName = parsed.methodNameValue()
         if (methodName != null) {
-            return retraceMethodLine(parsed, classMapping, obfuscatedClass, methodName, context)
+            return retraceMethodLine(parsed, classMapping, methodName, context)
         }
         val fieldName = parsed.fieldName?.value(parsed.line)
         if (fieldName != null) {
-            return retraceFieldLine(parsed, classMapping, obfuscatedClass, fieldName, context)
+            return retraceFieldLine(parsed, classMapping, fieldName, context)
         }
         return retraceClassOnlyLine(parsed, classMapping, obfuscatedClass)
     }
@@ -43,7 +43,6 @@ internal class RetraceEngine(
         val frame =
             RenderFrame(
                 className = retracedClass,
-                hasClassRetraceResult = classMapping != null,
                 methodSignature = null,
                 sourceFile = null,
                 lineNumber = null,
@@ -58,7 +57,6 @@ internal class RetraceEngine(
     private fun retraceFieldLine(
         parsed: ParsedStackLine,
         classMapping: ClassMapping?,
-        obfuscatedClass: String,
         fieldName: String,
         context: RetraceContext,
     ): RetracedLineResult {
@@ -70,7 +68,6 @@ internal class RetraceEngine(
             val frame =
                 RenderFrame(
                     className = classMapping.originalName,
-                    hasClassRetraceResult = true,
                     methodSignature = null,
                     fieldSignature = null,
                     sourceFile = sourceFileFor(classMapping.originalName, classMapping, parsed),
@@ -85,7 +82,6 @@ internal class RetraceEngine(
                 val frame =
                     RenderFrame(
                         className = holder,
-                        hasClassRetraceResult = true,
                         methodSignature = null,
                         fieldSignature = field.originalSignature,
                         sourceFile = sourceFileFor(holder, classMapping, parsed),
@@ -100,7 +96,6 @@ internal class RetraceEngine(
     private fun retraceMethodLine(
         parsed: ParsedStackLine,
         classMapping: ClassMapping?,
-        obfuscatedClass: String,
         methodName: String,
         context: RetraceContext,
     ): RetracedLineResult {
@@ -113,7 +108,6 @@ internal class RetraceEngine(
             val frame =
                 RenderFrame(
                     className = classMapping.originalName,
-                    hasClassRetraceResult = true,
                     methodSignature = MethodSignature(methodName, "void", emptyList()),
                     sourceFile = sourceFileFor(classMapping.originalName, classMapping, parsed),
                     lineNumber = lineNumber,
@@ -126,7 +120,6 @@ internal class RetraceEngine(
             val frame =
                 RenderFrame(
                     className = classMapping.originalName,
-                    hasClassRetraceResult = true,
                     methodSignature = MethodSignature(methodName, "void", emptyList()),
                     sourceFile = sourceFileFor(classMapping.originalName, classMapping, parsed),
                     lineNumber = lineNumber,
@@ -136,7 +129,7 @@ internal class RetraceEngine(
         }
         val allAlternatives =
             selected.groups.flatMap { group ->
-                expandAmbiguousOriginalLines(group, selected.position).map { forcedLine ->
+                expandAmbiguousOriginalLines(group).map { forcedLine ->
                     framesFromGroup(classMapping, parsed, group, selected.position, forcedLine, context)
                 }
             }
@@ -201,7 +194,7 @@ internal class RetraceEngine(
         return groups
     }
 
-    private fun expandAmbiguousOriginalLines(group: List<MethodMapping>, lineNumber: Int?): List<Int?> {
+    private fun expandAmbiguousOriginalLines(group: List<MethodMapping>): List<Int?> {
         val top = group.firstOrNull() ?: return listOf(null)
         val originalRange = top.originalRange ?: return listOf(null)
         val minifiedRange = top.minifiedRange
@@ -240,7 +233,6 @@ internal class RetraceEngine(
                     }
                 RenderFrame(
                     className = holder,
-                    hasClassRetraceResult = true,
                     methodSignature = unqualified(mapping.originalSignature),
                     sourceFile = sourceFile,
                     lineNumber = originalLine,
@@ -315,13 +307,11 @@ internal class RetraceEngine(
     private fun replacementFor(parsed: ParsedStackLine, token: LineToken, frame: RenderFrame): String =
         when (token) {
             parsed.className ->
-                frame.className?.let {
-                    if (parsed.className.classNameType == ClassNameType.BINARY) {
-                        TypeNames.typeToBinaryName(it)
-                    } else {
-                        it
-                    }
-                } ?: token.value(parsed.line)
+                if (parsed.className.classNameType == ClassNameType.BINARY) {
+                    TypeNames.typeToBinaryName(frame.className)
+                } else {
+                    frame.className
+                }
             parsed.methodName -> frame.methodSignature?.let { methodDescription(it) } ?: token.value(parsed.line)
             parsed.fieldName -> frame.fieldSignature?.let { fieldDescription(it) } ?: token.value(parsed.line)
             parsed.sourceFile -> frame.sourceFile ?: token.value(parsed.line)
@@ -397,8 +387,7 @@ internal class RetraceEngine(
     )
 
     private data class RenderFrame(
-        val className: String?,
-        val hasClassRetraceResult: Boolean,
+        val className: String,
         val methodSignature: MethodSignature? = null,
         val fieldSignature: FieldSignature? = null,
         val sourceFile: String? = null,

@@ -38,47 +38,6 @@ internal object TypeNames {
         return base + "[]".repeat(dimensions)
     }
 
-    fun parseMethodDescriptor(descriptor: String): Pair<List<String>, String>? {
-        if (!descriptor.startsWith("(")) return null
-        val endArguments = descriptor.indexOf(')')
-        if (endArguments < 0) return null
-        val parameters = mutableListOf<String>()
-        var index = 1
-        while (index < endArguments) {
-            val parsed = parseDescriptorType(descriptor, index) ?: return null
-            parameters += parsed.first
-            index = parsed.second
-        }
-        val returnType = descriptorToTypeName(descriptor.substring(endArguments + 1)) ?: return null
-        return parameters to returnType
-    }
-
-    private fun parseDescriptorType(descriptor: String, start: Int): Pair<String, Int>? {
-        var index = start
-        var dimensions = 0
-        while (index < descriptor.length && descriptor[index] == '[') {
-            dimensions += 1
-            index += 1
-        }
-        if (index >= descriptor.length) return null
-        val base: String
-        val nextIndex: Int
-        when (val marker = descriptor[index]) {
-            'L' -> {
-                val end = descriptor.indexOf(';', index)
-                if (end < 0) return null
-                base = descriptor.substring(index + 1, end).replace('/', '.')
-                nextIndex = end + 1
-            }
-            in primitiveDescriptors.keys -> {
-                base = primitiveDescriptors[marker] ?: return null
-                nextIndex = index + 1
-            }
-            else -> return null
-        }
-        return base + "[]".repeat(dimensions) to nextIndex
-    }
-
     fun retraceType(typeName: String, mapping: MappingIndex): String {
         if (typeName == "void") return typeName
         var base = typeName
@@ -118,15 +77,4 @@ internal object TypeNames {
         }
         return "$fileName.$extension"
     }
-}
-
-internal fun MappingInfo.ResidualSignature.asMethodSignature(renamedName: String): MethodSignature? {
-    val parsed = TypeNames.parseMethodDescriptor(descriptor) ?: return null
-    return MethodSignature(name = renamedName, type = parsed.second, parameters = parsed.first)
-}
-
-internal fun MappingInfo.ResidualSignature.asFieldSignature(renamedName: String): FieldSignature? {
-    val typeName = TypeNames.descriptorToTypeName(descriptor) ?: return null
-    if (typeName == "void") return null
-    return FieldSignature(name = renamedName, type = typeName)
 }

@@ -1,11 +1,8 @@
 package li.songe.retrace
 
-internal class MappingParser(
-    private val config: RetraceConfig,
-) {
+internal class MappingParser {
     private val diagnostics = mutableListOf<RetraceDiagnostic>()
     private val classes = linkedMapOf<String, MutableClassMapping>()
-    private val mapVersions = mutableListOf<String>()
 
     private var currentClass: MutableClassMapping? = null
     private var lastMemberKind: LastMemberKind? = null
@@ -16,7 +13,6 @@ internal class MappingParser(
         }
         return MappingIndex(
             classes = classes.mapValues { it.value.freeze() },
-            mapVersions = mapVersions.toList(),
             diagnostics = diagnostics.toList(),
         )
     }
@@ -38,13 +34,13 @@ internal class MappingParser(
     private fun parseComment(rawLine: String, trimmedStart: String, lineNumber: Int) {
         val info = MappingInfoParser.parse(trimmedStart) ?: return
         when (info) {
-            is MappingInfo.MapVersion -> mapVersions += info.version
             is MappingInfo.Unknown ->
                 diagnostics += RetraceDiagnostic(
                     RetraceDiagnostic.Severity.INFO,
                     lineNumber,
                     "Unknown mapping information '${info.id}'",
                 )
+            MappingInfo.MapVersion -> Unit
             else -> applyScopedInfo(rawLine, info)
         }
     }
@@ -54,25 +50,16 @@ internal class MappingParser(
         val isIndented = rawLine.firstOrNull()?.isWhitespace() == true
         val memberKind = lastMemberKind
         if (isIndented && memberKind != null) {
-            when (memberKind) {
-                LastMemberKind.METHOD -> {
-                    val lastIndex = clazz.methods.lastIndex
-                    if (lastIndex >= 0) {
-                        clazz.methods[lastIndex] = clazz.methods[lastIndex].withInfo(info)
-                    }
-                }
-                LastMemberKind.FIELD -> {
-                    val lastIndex = clazz.fields.lastIndex
-                    if (lastIndex >= 0) {
-                        clazz.fields[lastIndex] = clazz.fields[lastIndex].withInfo(info)
-                    }
+            if (memberKind == LastMemberKind.METHOD) {
+                val lastIndex = clazz.methods.lastIndex
+                if (lastIndex >= 0) {
+                    clazz.methods[lastIndex] = clazz.methods[lastIndex].withInfo(info)
                 }
             }
             return
         }
         when (info) {
             is MappingInfo.SourceFile -> clazz.sourceFile = info.fileName
-            is MappingInfo.CompilerSynthesized -> clazz.synthesized = true
             else -> Unit
         }
     }
@@ -91,7 +78,7 @@ internal class MappingParser(
         }
         currentClass =
             classes.getOrPut(obfuscated) {
-                MutableClassMapping(originalName = original, obfuscatedName = obfuscated)
+                MutableClassMapping(originalName = original)
             }
         lastMemberKind = null
     }
@@ -125,11 +112,9 @@ internal class MappingParser(
             val method =
                 MethodMapping(
                     originalSignature = parsed.signature,
-                    residualSignature = parsed.signature.renamed(obfuscatedName),
                     obfuscatedName = obfuscatedName,
                     minifiedRange = minifiedRange,
                     originalRange = parsed.originalRange,
-                    sourceLine = lineNumber,
                     synthesized = false,
                     outline = false,
                     outlineCallsite = null,
@@ -150,10 +135,7 @@ internal class MappingParser(
             clazz.fields +=
                 FieldMapping(
                     originalSignature = signature,
-                    residualSignature = signature.renamed(obfuscatedName),
                     obfuscatedName = obfuscatedName,
-                    sourceLine = lineNumber,
-                    synthesized = false,
                 )
             lastMemberKind = LastMemberKind.FIELD
         }

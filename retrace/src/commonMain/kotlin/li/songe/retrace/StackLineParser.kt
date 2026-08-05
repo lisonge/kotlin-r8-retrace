@@ -19,7 +19,7 @@ internal class StackLineParser(
         handlers.forEach { handler ->
             if (seenMatchedClass && handler.isClassHandler) return@forEach
             val group = match.groups[handler.groupIndex] ?: return@forEach
-            if (handler.apply(builder, group.range.first, group.range.last + 1, group.value)) {
+            if (handler.apply(builder, group.range.first, group.range.last + 1)) {
                 seenMatchedClass = seenMatchedClass || handler.isClassHandler
             }
         }
@@ -130,14 +130,15 @@ private sealed class RegexGroupHandler(
     val groupIndex: Int,
     val isClassHandler: Boolean = false,
 ) {
-    abstract fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int, value: String): Boolean
+    abstract fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int): Boolean
 }
 
 private class ClassGroupHandler(
     groupIndex: Int,
     private val classNameType: ClassNameType,
 ) : RegexGroupHandler(groupIndex, isClassHandler = true) {
-    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int, value: String): Boolean {
+    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int): Boolean {
+        val value = builder.line.substring(start, end)
         if (value == "Suppressed") return false
         val classStart = if (classNameType == ClassNameType.TYPENAME) start + value.lastIndexOf('/') + 1 else start
         builder.registerClassName(classStart, end, classNameType)
@@ -146,28 +147,28 @@ private class ClassGroupHandler(
 }
 
 private class MethodNameGroupHandler(groupIndex: Int) : RegexGroupHandler(groupIndex) {
-    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int, value: String): Boolean {
+    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int): Boolean {
         builder.registerMethodName(start, end)
         return true
     }
 }
 
 private class FieldNameGroupHandler(groupIndex: Int) : RegexGroupHandler(groupIndex) {
-    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int, value: String): Boolean {
+    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int): Boolean {
         builder.registerFieldName(start, end)
         return true
     }
 }
 
 private class SourceFileGroupHandler(groupIndex: Int) : RegexGroupHandler(groupIndex) {
-    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int, value: String): Boolean {
+    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int): Boolean {
         builder.registerSourceFile(start, end)
         return true
     }
 }
 
 private class LineNumberGroupHandler(groupIndex: Int) : RegexGroupHandler(groupIndex) {
-    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int, value: String): Boolean {
+    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int): Boolean {
         var lineStart = start
         var insertSeparator = false
         if (lineStart > 0 && builder.line[lineStart - 1] == ':') {
@@ -180,7 +181,8 @@ private class LineNumberGroupHandler(groupIndex: Int) : RegexGroupHandler(groupI
 }
 
 private class SourceFileLineNumberGroupHandler(groupIndex: Int) : RegexGroupHandler(groupIndex) {
-    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int, value: String): Boolean {
+    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int): Boolean {
+        val value = builder.line.substring(start, end)
         val sourceEnd = start + findEndOfSourceFile(value)
         builder.registerSourceFile(start, sourceEnd)
         builder.registerLineNumber(minOf(sourceEnd, end), end, insertSeparator = true)
@@ -200,14 +202,14 @@ private class SourceFileLineNumberGroupHandler(groupIndex: Int) : RegexGroupHand
 }
 
 private class FieldOrReturnTypeGroupHandler(groupIndex: Int) : RegexGroupHandler(groupIndex) {
-    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int, value: String): Boolean {
+    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int): Boolean {
         builder.registerFieldOrReturnType(start, end)
         return true
     }
 }
 
 private class MethodArgumentsGroupHandler(groupIndex: Int) : RegexGroupHandler(groupIndex) {
-    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int, value: String): Boolean {
+    override fun apply(builder: ParsedStackLineBuilder, start: Int, end: Int): Boolean {
         builder.registerMethodArguments(start, end)
         return true
     }

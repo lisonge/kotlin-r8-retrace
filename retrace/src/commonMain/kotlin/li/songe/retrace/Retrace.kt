@@ -18,8 +18,8 @@ public object Retrace {
 }
 
 public class Retracer internal constructor(
-    private val mappingIndex: MappingIndex,
-    private val config: RetraceConfig,
+    mappingIndex: MappingIndex,
+    config: RetraceConfig,
 ) {
     private val engine = RetraceEngine(mappingIndex, config)
 
@@ -35,7 +35,7 @@ public class Retracer internal constructor(
             mapping: String,
             config: RetraceConfig = RetraceConfig(),
         ): Retracer {
-            val mappingIndex = MappingParser(config).parse(mapping)
+            val mappingIndex = MappingParser().parse(mapping)
             val errors = mappingIndex.diagnostics.filter { it.severity == RetraceDiagnostic.Severity.ERROR }
             if (errors.isNotEmpty()) {
                 throw RetraceException("Invalid mapping file", mappingIndex.diagnostics)
