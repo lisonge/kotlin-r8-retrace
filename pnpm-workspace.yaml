@@ -1,3 +1,7 @@
 packages:
   - retrace-wasm
   - retrace-website
+
+allowBuilds:
+  sharp: true
+  workerd: true
