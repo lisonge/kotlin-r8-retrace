@@ -56,4 +56,5 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy retrace-website/dist --project-name=r8-retrace
+          workingDirectory: retrace-website
+          command: pages deploy dist --project-name=r8-retrace
