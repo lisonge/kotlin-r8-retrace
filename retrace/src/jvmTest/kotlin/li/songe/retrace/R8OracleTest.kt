@@ -26,12 +26,12 @@ class R8OracleTest {
     @Test
     fun matchesR8ForOutlineStringRetraceAllFrames() {
         val mapping =
-            """
+            $$$"""
             # {'id':'com.android.tools.r8.mapping','version':'2.2'}
-            package.Class${'$'}${'$'}ExternalSyntheticOutline0 -> package.internal.X:
-            # {'id':'sourceFile','fileName':'R8${'$'}${'$'}SyntheticClass'}
+            package.Class$$ExternalSyntheticOutline0 -> package.internal.X:
+            # {'id':'sourceFile','fileName':'R8$$SyntheticClass'}
             # {'id':'com.android.tools.r8.synthesized'}
-                1:2:long package.${'$'}HASH${'$'}0.m(long,long,long):0:1 -> a
+                1:2:long package.$HASH$0.m(long,long,long):0:1 -> a
                 # {'id':'com.android.tools.r8.outline'}
             package.Class -> package.internal.Y:
             # {'id':'sourceFile','fileName':'FieldDefinition.java'}
