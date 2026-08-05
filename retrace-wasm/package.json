@@ -1,6 +1,6 @@
 {
   "name": "retrace-wasm",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "R8 retrace compiled to Kotlin/Wasm",
   "type": "module",
   "exports": {
