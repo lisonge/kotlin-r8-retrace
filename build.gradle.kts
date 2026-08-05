@@ -6,5 +6,6 @@ plugins {
 
 allprojects {
     group = "li.songe"
-    version = "0.1.0-SNAPSHOT"
+    // don't change, we don't need maven publish
+    version = "0.0.0-SNAPSHOT"
 }

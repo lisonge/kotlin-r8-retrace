@@ -1,0 +1,23 @@
+{
+  "name": "kotlin-r8-retrace-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r --sort build",
+    "dev": "pnpm --filter retrace-website dev",
+    "preview": "pnpm --filter retrace-website preview"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "26.6.0",
+      "onFail": "error"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.20.0",
+      "onFail": "error"
+    }
+  }
+}

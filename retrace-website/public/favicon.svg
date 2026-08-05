@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>R8 Retrace</title>
+  <rect x="3" y="3" width="58" height="58" rx="14" fill="#1f6656" />
+  <g fill="#f8f5ed">
+    <rect x="28" y="15" width="23" height="6" rx="3" />
+    <rect x="28" y="29" width="19" height="6" rx="3" />
+    <rect x="28" y="43" width="15" height="6" rx="3" />
+  </g>
+  <path
+    d="M22 48C7 42 7 23 22 16"
+    fill="none"
+    stroke="#f08a57"
+    stroke-linecap="round"
+    stroke-width="5"
+  />
+  <path
+    d="m15 17 8-3-1 8"
+    fill="none"
+    stroke="#f08a57"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="5"
+  />
+</svg>

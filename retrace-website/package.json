@@ -1,0 +1,21 @@
+{
+  "name": "retrace-website",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "retrace-wasm": "workspace:*",
+    "vue": "^3.5.34"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.7",
+    "typescript": "^6.0.3",
+    "unocss": "^66.7.5",
+    "vite": "^8.0.13",
+    "vue-tsc": "^3.3.3"
+  }
+}

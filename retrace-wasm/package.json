@@ -1,0 +1,29 @@
+{
+  "name": "retrace-wasm",
+  "version": "0.0.0",
+  "description": "R8 retrace compiled to Kotlin/Wasm",
+  "type": "module",
+  "exports": {
+    ".": "./dist/retrace-wasm.mjs"
+  },
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "node ./scripts/build.ts",
+    "prepublishOnly": "pnpm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lisonge/kotlin-r8-retrace",
+    "directory": "retrace-wasm"
+  },
+  "engines": {
+    "node": ">=26.6.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

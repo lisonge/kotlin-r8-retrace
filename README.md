@@ -1,47 +1,41 @@
 # kotlin-r8-retrace
 
-Kotlin Multiplatform implementation of the string-to-string part of R8 retrace.
+[Website](https://r8-retrace.pages.dev/)
 
-The public surface accepts a ProGuard/R8 mapping string, stack trace text, and a small config, then
-returns retraced text. JVM tests use `com.android.tools:r8` only as an oracle; the common runtime
-does not depend on R8.
+Kotlin Multiplatform implementation of the string-to-string part of R8 retrace, with desktop and browser clients.
 
 ## Modules
 
-- `:retrace` is the Kotlin Multiplatform retrace library.
-- `:sample-compose` is a Compose Multiplatform + Material 3 desktop sample.
+- `:retrace-core` is the Kotlin Multiplatform retrace library.
+- `:retrace-desktop` is the Compose Multiplatform desktop client.
+- `retrace-wasm` publishes the production Kotlin/Wasm module to npm.
+- `retrace-website` is the Vite + Vue browser client.
 
-Run the sample:
+The pnpm workspace contains only `retrace-wasm` and `retrace-website`.
+
+## Build
 
 ```powershell
-.\gradlew.bat :sample-compose:run
+pnpm install
+pnpm build
 ```
 
-Run all checks:
+`pnpm build` compiles the production Wasm module, copies its Kotlin sources for source maps, and then builds the website.
+
+Run the website locally:
+
+```powershell
+pnpm dev
+```
+
+Run the desktop client:
+
+```powershell
+.\gradlew.bat :retrace-desktop:run
+```
+
+Run all Kotlin checks:
 
 ```powershell
 .\gradlew.bat check
-```
-
-## Wasm JS
-
-Build the browser ES module distribution:
-
-```powershell
-.\gradlew.bat :retrace:wasmJsBrowserDevelopmentExecutableDistribution
-```
-
-The generated module exports plain functions:
-
-```javascript
-import {
-  createRetracer,
-  defaultRegex,
-  disposeRetracer,
-  retraceWith,
-} from "./retrace.js";
-
-const retracerId = createRetracer(mappingText, defaultRegex(), false);
-const output = retraceWith(retracerId, stackTraceText);
-disposeRetracer(retracerId);
 ```

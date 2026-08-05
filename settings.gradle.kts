@@ -1,7 +1,6 @@
 pluginManagement {
     repositories {
         google()
-        maven("https://repo1.maven.org/maven2")
         gradlePluginPortal()
         mavenCentral()
     }
@@ -10,12 +9,11 @@ pluginManagement {
 dependencyResolutionManagement {
     repositories {
         google()
-        maven("https://repo1.maven.org/maven2")
         mavenCentral()
     }
 }
 
 rootProject.name = "kotlin-r8-retrace"
 
-include(":retrace")
-include(":sample-compose")
+include(":retrace-core")
+include(":retrace-desktop")
