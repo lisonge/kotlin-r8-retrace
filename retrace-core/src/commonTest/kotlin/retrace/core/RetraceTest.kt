@@ -81,6 +81,16 @@ class RetraceTest {
     }
 
     @Test
+    fun exportedRetracerIdsIncreaseSequentially() {
+        val firstRetracerId = createRetracerExport(mapping = "", regex = "", verbose = false)
+        val secondRetracerId = createRetracerExport(mapping = "", regex = "", verbose = false)
+
+        assertEquals(firstRetracerId + 1, secondRetracerId)
+        assertTrue(disposeRetracerExport(firstRetracerId))
+        assertTrue(disposeRetracerExport(secondRetracerId))
+    }
+
+    @Test
     fun expandsInlineFrames() {
         val mapping =
             """
