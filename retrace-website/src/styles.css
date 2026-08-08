@@ -1,9 +1,75 @@
 :root {
-  color: #18201d;
-  background: #f3f0e8;
+  color-scheme: light;
+  --canvas: #f3f0e8;
+  --text: #18201d;
+  --text-body: #27302c;
+  --text-muted: #666b66;
+  --text-muted-secondary: #686d68;
+  --text-control: #555d58;
+  --border: #c8c5bb;
+  --border-subtle: #d8d4ca;
+  --border-control: #bbb8ae;
+  --border-drop: #aaa79d;
+  --panel: #e9e6dd;
+  --surface: #fbf9f3;
+  --surface-subtle: #f5f2ea;
+  --surface-field: #f8f5ed;
+  --surface-hover: #dcd8cd;
+  --surface-drop-hover: #f0eee6;
+  --surface-button-hover: #ffffff;
+  --brand: #1f6656;
+  --brand-hover: #164c41;
+  --brand-button: #1d5f51;
+  --brand-on: #f8f5ed;
+  --primary-on: #fffaf1;
+  --accent: #c34d29;
+  --danger-text: #8b3c28;
+  --danger-hover: #eadfd8;
+  --placeholder: #aaa99f;
+  --focus-ring: rgba(220, 89, 46, 0.3);
+  --warning-halo: rgba(220, 89, 46, 0.12);
+  --error-halo: rgba(180, 63, 38, 0.12);
+  --success-halo: rgba(31, 128, 106, 0.12);
+
+  color: var(--text);
+  background: var(--canvas);
   font-family: 'Segoe UI Variable', system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --canvas: #111714;
+  --text: #e8ede9;
+  --text-body: #dce5df;
+  --text-muted: #a5aea8;
+  --text-muted-secondary: #99a39d;
+  --text-control: #bdc7c1;
+  --border: #3b4540;
+  --border-subtle: #303a35;
+  --border-control: #4a554f;
+  --border-drop: #59645e;
+  --panel: #202824;
+  --surface: #171e1b;
+  --surface-subtle: #1c2420;
+  --surface-field: #151c19;
+  --surface-hover: #313b36;
+  --surface-drop-hover: #26312c;
+  --surface-button-hover: #303a35;
+  --brand: #45a78d;
+  --brand-hover: #56b99f;
+  --brand-button: #287861;
+  --brand-on: #f1f8f4;
+  --primary-on: #f5fff9;
+  --accent: #f0784e;
+  --danger-text: #f08a68;
+  --danger-hover: #492a23;
+  --placeholder: #69736d;
+  --focus-ring: rgba(240, 120, 78, 0.42);
+  --warning-halo: rgba(240, 120, 78, 0.18);
+  --error-halo: rgba(232, 99, 68, 0.18);
+  --success-halo: rgba(69, 167, 141, 0.18);
 }
 
 * {
@@ -12,13 +78,16 @@
 
 html {
   min-width: 320px;
-  background: #f3f0e8;
+  background: var(--canvas);
 }
 
 body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  color: var(--text);
+  background: var(--canvas);
+  transition: color 160ms ease, background-color 160ms ease;
 }
 
 button,
@@ -36,7 +105,7 @@ input:focus-visible,
 textarea:focus-visible,
 summary:focus-visible,
 pre:focus-visible {
-  outline: 3px solid rgba(220, 89, 46, 0.3);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 

@@ -13,6 +13,25 @@
       content="Retrace R8 or ProGuard-obfuscated Android stack traces locally in your browser."
     />
     <meta name="theme-color" content="#f3f0e8" />
+    <script>
+      (() => {
+        let mode = 'auto';
+        try {
+          const storedMode = window.localStorage.getItem('r8-retrace-theme');
+          if (storedMode === 'light' || storedMode === 'dark' || storedMode === 'auto') {
+            mode = storedMode;
+          }
+        } catch {}
+
+        const isDark = mode === 'dark'
+          || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        const theme = isDark ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+        document.querySelector('meta[name="theme-color"]')
+          ?.setAttribute('content', isDark ? '#111714' : '#f3f0e8');
+      })();
+    </script>
     <title>R8 Retrace · Online Stack Trace Retracing</title>
   </head>
   <body>
